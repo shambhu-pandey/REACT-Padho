@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<head>
+  <title>Map ko samjhte hai </title>
+  <body>
+    
+    <script>
+  //  let array = [1,2,3,4,5,6,7,8,9];
+  //  console.log(array);
+  //  console.log(array[0]);
+
+  //  let newArray = array.map(function(value , i){
+  // //  return value + "pandey";
+
+  // return(
+  // console.log(i , "=" , value)
+  // )
+  //  });
+
+  //  console.log(newArray);
+  // console.log(array)
+
+
+
+
+   const arrayObject =  [
+{  id : 1 , name: "shambhu" ,  degree : "bca"},
+{  id : 2 , name: "pandey" ,  degree : "mca"},
+{  id : 3 , name: "pandey ji" ,  degree : "mba"},
+
+   ]
+
+   console.log(arrayObject);
+
+  const newdata = arrayObject.map((value) => {
+   return(
+    console.log(value.id),
+    console.log(value.name),
+   console.log( ` my name is ${value.name} and my regno is ${value.id}`)
+
+   )
+
+   console.log(newdata);
+  });
+
+
+
+    </script>
+
+  </body>
+</head>
+</html>
