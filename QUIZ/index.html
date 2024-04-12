@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cricket Stress Management Quiz</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+    }
+
+    .quiz-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .question-container {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: #f9f9f9;
+    }
+
+    h1, h2 {
+        color: #333;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .option-button {
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        display: block;
+        width: 100%;
+        text-align: left;
+    }
+
+    .option-button:hover {
+        background-color: #45a049;
+    }
+
+    .selected {
+        background-color: #b3ffb3 !important;
+    }
+
+    #chart-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    #quiz-feedback {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .answer-explanation {
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Cricket Stress Management Quiz</h1>
+        <form id="quiz-form">
+            <div class="question-container">
+                <h2>Question 1: What is the best way to handle stress during a cricket match?</h2>
+                <label>
+                    <button type="button" class="option-button" data-value="a">A) Taking deep breaths</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="b">B) Talking to a teammate</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="c">C) Visualizing success</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="d">D) All of the above</button>
+                </label>
+            </div>
+
+            <div class="question-container">
+                <h2>Question 2: What should a player do if they make a mistake during a match?</h2>
+                <label>
+                    <button type="button" class="option-button" data-value="a">A) Get frustrated and give up</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="b">B) Blame other teammates</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="c">C) Analyze the mistake and focus on the next opportunity</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="d">D) None of the above</button>
+                </label>
+            </div>
+
+            <div class="question-container">
+                <h2>Question 3: What can help a player stay calm under pressure?</h2>
+                <label>
+                    <button type="button" class="option-button" data-value="a">A) Positive self-talk</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="b">B) Practicing mindfulness techniques</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="c">C) Prioritizing tasks</button>
+                </label>
+                <label>
+                    <button type="button" class="option-button" data-value="d">D) All of the above</button>
+                </label>
+            </div>
+
+            <button type="submit">Submit</button>
+            <button type="button" id="reset-btn">Reset</button>
+            <button type="button" id="download-report-btn" style="display: none;">Download Receipt</button>
+        </form>
+        <div id="chart-container" style="display: none;">
+            <canvas id="pie-chart"></canvas>
+            <canvas id="bar-chart"></canvas>
+        </div>
+        <p id="quiz-feedback"></p>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const optionButtons = document.querySelectorAll('.option-button');
+          optionButtons.forEach(button => {
+              button.addEventListener('click', function() {
+                  optionButtons.forEach(btn => btn.classList.remove('selected'));
+                  this.classList.add('selected');
+              });
+          });
+
+          document.getElementById('quiz-form').addEventListener('submit', function(event) {
+              event.preventDefault();
+              const selectedOptions = document.querySelectorAll('.selected');
+              if (selectedOptions.length !== 3) {
+                  alert('Please answer all questions.');
+                  return;
+              }
+
+              const answers = {
+                  q1: selectedOptions[0].getAttribute('data-value'),
+                  q2: selectedOptions[1].getAttribute('data-value'),
+                  q3: selectedOptions[2].getAttribute('data-value')
+              };
+
+              const correctAnswers = {
+                  q1: 'd',
+                  q2: 'c',
+                  q3: 'd'
+              };
+
+              let score = 0;
+
+              for (const key in answers) {
+                  if (answers[key] === correctAnswers[key]) {
+                      score++;
+                  }
+              }
+
+              const totalQuestions = Object.keys(answers).length;
+              const percentage = ((score / totalQuestions) * 100).toFixed(2);
+              const feedback = `You got ${score} out of ${totalQuestions} (${percentage}%) questions correct.`;
+              document.getElementById('quiz-feedback').textContent = feedback;
+
+              const chartData = [
+                  { answer: 'Correct', value: score },
+                  { answer: 'Incorrect', value: totalQuestions - score }
+              ];
+
+              displayCharts(chartData);
+              document.getElementById('download-report-btn').style.display = 'block';
+          });
+
+          document.getElementById('reset-btn').addEventListener('click', function() {
+              document.getElementById('quiz-feedback').textContent = '';
+              document.getElementById('chart-container').style.display = 'none';
+              document.getElementById('quiz-form').reset();
+              document.getElementById('quiz-form').style.display = 'block';
+              optionButtons.forEach(btn => btn.classList.remove('selected'));
+              document.getElementById('download-report-btn').style.display = 'none';
+          });
+
+          document.getElementById('download-report-btn').addEventListener('click', function() {
+              const feedback = document.getElementById('quiz-feedback').textContent;
+              generatePDF(feedback);
+          });
+      });
+
+      function displayCharts(data) {
+          const chartContainer = document.getElementById('chart-container');
+          chartContainer.style.display = 'block';
+          const pieChart = document.getElementById('pie-chart').getContext('2d');
+          const barChart = document.getElementById('bar-chart').getContext('2d');
+
+          const pieChartConfig = {
+              type: 'pie',
+              data: {
+                  labels: data.map(item => item.answer),
+                  datasets: [{
+                      label: 'Quiz Results',
+                      data: data.map(item => item.value),
+                      backgroundColor: [
+                          '#4caf50',
+                          '#f44336'
+                      ]
+                  }]
+              },
+              options: {
+                  plugins: {
+                      legend: {
+                          position: 'bottom'
+                      }
+                  }
+              }
+          };
+
+          const barChartConfig = {
+              type: 'bar',
+              data: {
+                  labels: data.map(item => item.answer),
+                  datasets: [{
+                      label: 'Quiz Results',
+                      data: data.map(item => item.value),
+                      backgroundColor: [
+                          '#4caf50',
+                          '#f44336'
+                      ]
+                  }]
+              },
+              options: {
+                  plugins: {
+                      legend: {
+                          display: false
+                      }
+                  }
+              }
+          };
+
+          new Chart(pieChart, pieChartConfig);
+          new Chart(barChart, barChartConfig);
+      }
+
+      function generatePDF(feedback) {
+          const pdf = new jsPDF();
+          pdf.text(20, 20, 'Cricket Stress Management Quiz Report');
+          pdf.text(20, 30, feedback);
+          pdf.save('quiz_report.pdf');
+      }
+  </script>
+
+</body>
+</html>
